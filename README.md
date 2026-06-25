@@ -73,22 +73,25 @@ year (the file tells you where each comes from):
 | `VA_BASE`, `VA_ADD` | VA disability compensation + dependent add-ons | VA.gov (effective Dec 1) |
 | `FED`, `FICA` | Federal brackets, standard deduction, payroll tax | IRS / SSA |
 | `STATES` | Approx. state income-tax rate + military-retirement exemption | state revenue depts. |
-| `PAY` | Monthly basic pay by grade × years of service (auto-fills the form) | DFAS / official pay chart |
-| `BAH_ZIP3`, `BAH_GRADE_MULT`, `NAT_E5_BAH` | BAH by ZIP region × grade (auto-fills BAH) | DoD BAH calculator |
-| `BAS_ENL`, `BAS_OFF` | Flat enlisted / officer subsistence rates | DoD BAS table |
+| `PAY` | Monthly basic pay by grade × years of service — **exact official 2026 DFAS table** (3.8% raise) | DFAS 2026 pay table |
+| `BAS_ENL`, `BAS_OFF` | Flat enlisted / officer subsistence — **exact official 2026 rates** ($476.95 / $328.48) | DoD 2026 BAS |
+| `BAH_ZIP3`, `BAH_GRADE_MULT`, `NAT_E5_BAH` | BAH **estimate** by ZIP region × grade (auto-fills BAH) | DoD BAH calculator |
 
-The pay/BAH/BAS tables only **auto-fill** the editable pay fields — base pay & BAS from
-the chosen grade + years of service, and **BAH from the duty ZIP** (`BAH_ZIP3` keys on the
-first 3 ZIP digits; unknown ZIPs use `NAT_E5_BAH`). The member can always overwrite any
-line with their exact LES figure, and should for BAH since the ZIP table is approximate.
+The tables only **auto-fill** the editable pay fields — base pay & BAS from the chosen
+grade + years of service, and **BAH from the duty ZIP** (`BAH_ZIP3` keys on the first 3 ZIP
+digits; unknown ZIPs use `NAT_E5_BAH`). **Base pay and BAS are the exact published 2026
+figures.** BAH is the one **estimate** — it's location-specific (grade × ~300 housing areas
+× dependent status), so the authoritative number is on the member's LES / the DoD BAH
+calculator; overwrite the BAH field with that for accuracy.
 
 **Optional benefits start empty.** Education fields (GI Bill housing, post-degree salary,
 dependent transfers) stay zeroed and out of the math until the member ticks the matching
 checkbox — so the comparison never assumes a benefit they won't use.
 
-> **These are 2026 planning estimates, intentionally simplified.** The app is a
-> decision aid, not tax or financial advice. Verify specifics with a personal financial
-> counselor (free via **Military OneSource**), your finance office, and the VA.
+> **Base pay and BAS are the exact published 2026 figures.** BAH, VA dependent add-ons,
+> and the state-tax rates are simplified estimates, and the federal tax math is intentionally
+> approximate. The app is a planning aid, not tax or financial advice — verify specifics with
+> a personal financial counselor (free via **Military OneSource**), your finance office, and the VA.
 
 ## Files
 

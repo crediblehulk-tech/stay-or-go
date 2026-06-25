@@ -1,5 +1,5 @@
 /* Service worker — cache the app shell for offline use. */
-const CACHE = "stay-or-go-v5";
+const CACHE = "stay-or-go-v6";
 const ASSETS = [
   "./",
   "./index.html",
