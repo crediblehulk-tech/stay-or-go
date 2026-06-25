@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1f3c" />
+<title>Stay or Go — Air Force Transition &amp; Financial Planner</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="app-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <img src="icons/icon.svg" alt="" class="brand-mark" width="40" height="40" />
+      <div>
+        <h1>Stay or Go</h1>
+        <p class="tagline">Air Force separation &amp; retirement financial planner</p>
+      </div>
+    </div>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#inputs">Your info</a>
+      <a href="#summary">Results</a>
+      <a href="#tradeoff">Pension vs. pay</a>
+      <a href="#scenarios">Scenarios</a>
+      <a href="#tree">Stay-or-go</a>
+      <a href="#visuals">Visuals</a>
+      <a href="#checklist">Checklist</a>
+    </nav>
+  </div>
+</header>
+
+<div class="disclaimer wrap" role="note">
+  <strong>Planning estimate — not financial, tax, or legal advice.</strong>
+  Figures use 2026 estimated rates and simplified tax math to help you compare paths.
+  Verify specifics with a personal financial counselor (free via
+  <em>Military OneSource</em>), your finance office, and the VA before deciding.
+</div>
+
+<main class="wrap">
+
+  <!-- ============ INPUTS ============ -->
+  <section id="inputs" class="card">
+    <div class="card-head">
+      <h2>1 &middot; Tell the app about the member</h2>
+      <p class="muted">Prefilled with an example. Replace with the real numbers — most come straight off a current LES. Everything stays on this device.</p>
+    </div>
+
+    <div class="grid-forms">
+
+      <fieldset>
+        <legend>Service &amp; retirement</legend>
+        <label>Name / label <input type="text" data-path="profile.name" /></label>
+        <label>Pay grade / rank
+          <select data-path="profile.grade" id="gradeSelect"></select>
+          <span class="hint">Sets base pay, BAH &amp; BAS automatically — you can still edit each.</span>
+        </label>
+        <label>Retirement situation
+          <select data-path="profile.system">
+            <option value="separating">Separating (before 20 years — no pension)</option>
+            <option value="brs">Blended Retirement System (BRS, 2.0%/yr + TSP match)</option>
+            <option value="high3">Legacy High-3 (2.5%/yr, 20-yr cliff)</option>
+          </select>
+        </label>
+        <div class="two">
+          <label>Years of service now
+            <input type="number" min="0" max="40" step="0.5" data-path="profile.yos" />
+          </label>
+          <label>Years of service at separation/retirement
+            <input type="number" min="0" max="40" step="0.5" data-path="profile.planYOS" />
+          </label>
+        </div>
+        <label>Estimated final "high-3" monthly <em>base</em> pay
+          <input type="number" min="0" step="50" data-path="profile.high3Base" />
+          <span class="hint">Average base pay over your highest 36 months. Defaults to current base pay if blank.</span>
+        </label>
+        <label>Tax filing status
+          <select data-path="profile.filing">
+            <option value="mfj">Married filing jointly</option>
+            <option value="single">Single</option>
+            <option value="hoh">Head of household</option>
+          </select>
+        </label>
+        <label>State of legal residence (active-duty taxes)
+          <select data-path="profile.homeState" data-statelist></select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Current monthly pay</legend>
+        <p class="hint" style="margin:-2px 0 10px">Base pay &amp; BAS come from your grade &amp; years of service; BAH comes from your duty ZIP. All three are editable — overwrite any line with your exact LES figure.</p>
+        <label>Base pay <input type="number" min="0" step="50" data-path="pay.base" /></label>
+        <label>Duty ZIP code (sets BAH)
+          <input type="text" inputmode="numeric" maxlength="5" placeholder="e.g. 78236" data-path="pay.zip" />
+          <span class="hint">Looks up a local BAH estimate by ZIP. Leave blank for a national average.</span>
+        </label>
+        <label>BAH (housing, tax-free) <input type="number" min="0" step="25" data-path="pay.bah" /></label>
+        <label>BAS (food, tax-free) <input type="number" min="0" step="5" data-path="pay.bas" /></label>
+        <label>Other taxable special pay (monthly)
+          <input type="number" min="0" step="25" data-path="pay.special" />
+        </label>
+        <label>Value of military healthcare to replace as a civilian (per year)
+          <input type="number" min="0" step="250" data-path="pay.healthcareGap" />
+          <span class="hint">What family coverage would cost out of pocket after Tricare. ~$6k–$15k is typical.</span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>VA disability &amp; family</legend>
+        <label>Anticipated VA rating
+          <select data-path="va.rating">
+            <option value="0">0% (none)</option>
+            <option value="10">10%</option><option value="20">20%</option>
+            <option value="30">30%</option><option value="40">40%</option>
+            <option value="50">50%</option><option value="60">60%</option>
+            <option value="70">70%</option><option value="80">80%</option>
+            <option value="90">90%</option><option value="100">100%</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" data-path="va.pt" /> 100% Permanent &amp; Total (unlocks dependent education / Ch.35)</label>
+        <label class="check"><input type="checkbox" data-path="family.married" /> Married</label>
+        <div class="two">
+          <label>Children under 18
+            <input type="number" min="0" max="12" step="1" data-path="family.kidsU18" />
+          </label>
+          <label>Children 18–23 in school
+            <input type="number" min="0" max="12" step="1" data-path="family.kids1823" />
+          </label>
+        </div>
+        <label>Dependent parents
+          <input type="number" min="0" max="2" step="1" data-path="family.parents" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Spouse / household finances</legend>
+        <p class="hint" style="margin:-2px 0 10px">If married, the analysis treats your household as one unit — the spouse's income and savings count in every path.</p>
+        <label>Spouse employment income (monthly, gross)
+          <input type="range" min="0" max="20000" step="250" data-path="family.spouseIncome" data-slider="spouse" />
+          <output class="slider-out" id="spouseIncomeOut"></output>
+          <span class="hint">Drag — the prudent path updates live.</span>
+        </label>
+        <label>Spouse other monthly income (pension, SS, disability — net)
+          <input type="number" min="0" step="50" data-path="family.spouseOther" />
+        </label>
+        <label>Spouse investments / savings balance
+          <input type="number" min="0" step="500" data-path="savings.spouseInvest" />
+          <span class="hint">Pooled with yours for the &ldquo;stop working&rdquo; runway math.</span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Where you are vs. where you'd go</legend>
+        <label>Current location label
+          <input type="text" data-path="loc.curName" />
+        </label>
+        <label>Current cost-of-living index (US avg = 100)
+          <input type="number" min="50" max="250" step="1" data-path="loc.curCOL" />
+        </label>
+        <label>Destination location label
+          <input type="text" data-path="loc.destName" />
+        </label>
+        <div class="two">
+          <label>Destination cost-of-living index
+            <input type="number" min="50" max="250" step="1" data-path="loc.destCOL" />
+          </label>
+          <label>Destination state (civilian taxes)
+            <select data-path="loc.destState" data-statelist></select>
+          </label>
+        </div>
+        <label>Override: target monthly living expenses at destination (optional)
+          <input type="number" min="0" step="100" data-path="loc.expenses" />
+          <span class="hint">Leave 0 to auto-derive your lifestyle target from current pay + cost-of-living.</span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Savings &amp; the jobs you're weighing</legend>
+        <label>TSP / 401(k) balance <input type="number" min="0" step="500" data-path="savings.tsp" /></label>
+        <label>Other savings / investments <input type="number" min="0" step="500" data-path="savings.other" /></label>
+        <label>Expected civilian salary offer (per year)
+          <input type="range" min="40000" max="300000" step="2500" data-path="jobs.expectedCivSalary" data-slider="civ" />
+          <output class="slider-out" id="civSalaryOut"></output>
+          <span class="hint">Drag the slider — results update live.</span>
+        </label>
+        <div class="two">
+          <label>Reserve-side civilian salary (per year)
+            <input type="number" min="0" step="1000" data-path="jobs.reserveCivSalary" />
+          </label>
+          <label>Reserve drill+AT pay (monthly avg)
+            <input type="number" min="0" step="50" data-path="jobs.reserveDrillMonthly" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Education benefits (optional)</legend>
+        <p class="hint" style="margin:-2px 0 10px">Left out of the math unless you opt in — check a box only for a benefit this member will actually use.</p>
+        <label class="check"><input type="checkbox" data-path="edu.selfSchool" data-gatekey="school" /> Member plans to use the GI Bill for full-time school</label>
+        <div data-gate="school">
+          <label>GI Bill monthly housing allowance at school ZIP (tax-free income)
+            <input type="number" min="0" step="50" data-path="edu.mha" />
+            <span class="hint">Post-9/11 GI Bill pays roughly the local E-5-with-dependents BAH while you're a full-time student.</span>
+          </label>
+          <label>Expected salary after the degree (per year)
+            <input type="number" min="0" step="1000" data-path="edu.expectedPostGrad" />
+          </label>
+        </div>
+        <label class="check"><input type="checkbox" data-path="edu.transfer" data-gatekey="xfer" /> Transfer GI Bill months to dependents</label>
+        <div data-gate="xfer">
+          <label>Number of dependents to transfer to
+            <input type="number" min="0" max="12" step="1" data-path="edu.transferDeps" />
+          </label>
+        </div>
+      </fieldset>
+
+    </div>
+
+    <div class="actions">
+      <button id="calcBtn" class="primary">Analyze my options &darr;</button>
+      <button id="resetBtn" class="ghost">Reset to example</button>
+      <button id="printBtn" class="ghost">Print / save PDF</button>
+      <span id="saveNote" class="saved" hidden>Saved on this device</span>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="summary" class="card result-card" hidden>
+    <div class="card-head"><h2>2 &middot; Your bottom line</h2></div>
+    <div id="summaryBody"></div>
+  </section>
+
+  <section id="tradeoff" class="card result-card" hidden>
+    <div class="card-head">
+      <h2>3 &middot; Retire vs. a civilian paycheck</h2>
+      <p class="muted">How much a civilian would have to earn to replace the Air Force pension — and what "retire at 20 and never work again" looks like.</p>
+    </div>
+    <div id="tradeoffBody"></div>
+  </section>
+
+  <section id="scenarios" class="card result-card" hidden>
+    <div class="card-head">
+      <h2>4 &middot; Five paths, side by side</h2>
+      <p class="muted">Each path is normalized to today's cost of living so you can compare apples to apples. "Match" = share of your current lifestyle that path keeps.</p>
+    </div>
+    <div id="scenarioGrid" class="scenario-grid"></div>
+  </section>
+
+  <section id="tree" class="card result-card" hidden>
+    <div class="card-head">
+      <h2>5 &middot; Stay or go — the decision map</h2>
+      <p class="muted">Your inputs light up one path. The reasoning is spelled out below the diagram.</p>
+    </div>
+    <div id="treeBody"></div>
+  </section>
+
+  <section id="visuals" class="card result-card" hidden>
+    <div class="card-head">
+      <h2>6 &middot; The picture</h2>
+      <p class="muted">For visual learners: how each path stacks up, and how income moves over the next 15 years.</p>
+    </div>
+    <div id="chartsBody"></div>
+
+    <div class="audio-panel">
+      <h3>🔊 Narrated walkthrough</h3>
+      <p class="muted">Press play to hear the analysis read aloud (uses your device's built-in voice).</p>
+      <div class="audio-controls">
+        <button id="audioPlay" class="primary small">▶ Play</button>
+        <button id="audioPause" class="ghost small" disabled>⏸ Pause</button>
+        <button id="audioStop" class="ghost small" disabled>⏹ Stop</button>
+        <label class="inline">Voice
+          <select id="voiceSelect"></select>
+        </label>
+        <label class="inline">Speed
+          <input id="rateRange" type="range" min="0.6" max="1.3" step="0.05" value="0.85" />
+        </label>
+      </div>
+      <details class="transcript">
+        <summary>Read the transcript</summary>
+        <p id="narrationText"></p>
+      </details>
+    </div>
+  </section>
+
+  <section id="education" class="card result-card" hidden>
+    <div class="card-head">
+      <h2>7 &middot; Education benefits that generate income</h2>
+      <p class="muted">For the member and dependents — and the dollars they're worth.</p>
+    </div>
+    <div id="eduBody"></div>
+  </section>
+
+  <section id="checklist" class="card result-card" hidden>
+    <div class="card-head">
+      <h2>8 &middot; Everything to handle before you out-process</h2>
+      <p class="muted">Tick items off — your progress is saved on this device.</p>
+    </div>
+    <div id="checklistBody"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer wrap">
+  <p>Runs entirely on your device · works offline · install it from your browser menu.</p>
+  <p class="tiny">Rates are 2026 estimates and simplified for planning. Not affiliated with the Department of the Air Force, DoD, or VA.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
