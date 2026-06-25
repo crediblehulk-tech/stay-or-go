@@ -172,6 +172,13 @@ input[type=range]{padding:0;height:30px;accent-color:var(--navy-3);cursor:pointe
 .cmp-track > i{display:block;height:100%;border-radius:8px;transition:width .25s}
 .cmp-val{position:absolute;top:0;left:12px;line-height:32px;font-weight:800;color:#16202e;font-size:.92rem}
 .cmp-note{grid-column:2;font-size:.76rem;color:var(--muted);margin-top:-2px}
+
+/* Bridge-to-independence panel */
+.bridge{margin-top:18px;border:1px solid var(--gold);border-left:5px solid var(--gold);background:#fffaf0;border-radius:12px;padding:16px 18px}
+.bridge h3{margin:0 0 6px;color:var(--navy);font-size:1.05rem}
+.bridge > p{font-size:.9rem;color:#3a4757;margin:0 0 12px}
+.bridge .stat-row{margin-bottom:4px}
+.bridge .callout{margin-top:12px}
 @media (max-width:560px){
   .tradeoff-cards{grid-template-columns:1fr}
   .cmp-row{grid-template-columns:1fr}

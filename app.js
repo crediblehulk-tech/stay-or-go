@@ -392,10 +392,26 @@ function compute(s){
   const pensionSalaryEquiv = grossForNet(pension20Net*12, s.loc.destState, filing); // civilian salary netting the same
   const pensionLifetime30 = pension20Gross*12*30;                         // nominal 30-yr value (before COLA)
   const neverWorkMo = pension20Net + vaM + spouseTotalMo + householdSavings*SAFE_WITHDRAW/12;
+
+  // --- The "bridge to independence" for a SEPARATING member: how much to earn & save
+  //     between separating now (year YOS) and the 20-year mark so they could ALSO never
+  //     work again at 20 — self-funding what the pension would otherwise provide. ---
+  const BRIDGE_RETURN = 0.06; // assumed annual investment return while accumulating
+  const bridgeYears = Math.max(0, 20 - num(s.profile.yos));
+  const passiveAvailMo = vaM + spouseTotalMo + householdSavings*SAFE_WITHDRAW/12;  // at 20, member not working, before a new nest egg
+  const bridgeGapMo = Math.max(0, targetMo - passiveAvailMo);                      // lifestyle not yet covered by passive income
+  const bridgeNestEgg = bridgeGapMo*12 / SAFE_WITHDRAW;                            // extra nest egg to cover it for life (4% rule)
+  const fvFactor = bridgeYears>0 ? (Math.pow(1+BRIDGE_RETURN,bridgeYears)-1)/BRIDGE_RETURN : 0;
+  const bridgeAnnualSave = fvFactor>0 ? bridgeNestEgg/fvFactor : 0;                // yearly contribution that grows to the nest egg
+  const bridgeMemberNetYr = spendableMo*12 - vaM*12 + bridgeAnnualSave;           // civilian net to keep lifestyle AND save
+  const bridgeRequiredSalary = grossForNet(Math.max(0,bridgeMemberNetYr), s.loc.destState, filing);
+
   const tradeoff = {
     pension20Gross, pension20Net, pensionSalaryEquiv, pensionLifetime30,
     neverWorkMo, neverWorkMatch: neverWorkMo/Math.max(1,targetMo),
     neverWorkGapMo: Math.max(0, targetMo-neverWorkMo),
+    bridgeYears, bridgeNestEgg, bridgeAnnualSave, bridgeRequiredSalary, bridgeGapMo,
+    bridgeReturn: BRIDGE_RETURN, sepNowYos: num(s.profile.yos),
     expectedCiv: num(s.jobs.expectedCivSalary), crdp50: num(s.va.rating)>=50, system: s.profile.system
   };
 
@@ -609,6 +625,30 @@ function renderTradeoff(s,R){
   };
   const clears = b>=a, diff=Math.abs(b-a);
 
+  // "Bridge to independence" panel — what a separating member must earn/save between
+  // separating now and the 20-year mark to ALSO be able to never work again at 20.
+  const by=t.bridgeYears, sepAt=t.sepNowYos;
+  let bridgeHTML;
+  if(by<=0){
+    bridgeHTML = `<div class="bridge"><h3>🌉 The bridge to never working again</h3>
+      <p class="muted">You're already at or past 20 years of service, so there's no bridge to model. Set “years of service now” below 20 to see what separating earlier would take.</p></div>`;
+  } else if(t.bridgeGapMo<=0){
+    bridgeHTML = `<div class="bridge"><h3>🌉 The bridge to never working again</h3>
+      <p>Good news — your VA, spouse income, and current savings would already cover the household's lifestyle at the 20-year mark. You could separate now and still never have to work again, without replacing a pension; the pension would just be extra.</p></div>`;
+  } else {
+    bridgeHTML = `<div class="bridge">
+      <h3>🌉 If you separate now, the bridge to the same freedom at 20</h3>
+      <p class="muted">A retiree is handed the pension at 20. To be just as free — never working again at that same mark — you'd have to <strong>self-fund it</strong> in the ${by} year${by===1?"":"s"} between separating now (year ${sepAt}) and year 20.</p>
+      <div class="stat-row">
+        <div class="stat"><div class="k">Window to do it</div><div class="v">${by} yr${by===1?"":"s"}</div><div class="sub">year ${sepAt} → 20</div></div>
+        <div class="stat"><div class="k">Nest egg to build</div><div class="v">${money(t.bridgeNestEgg)}</div><div class="sub">so 4%/yr covers the gap for life</div></div>
+        <div class="stat"><div class="k">Save every year</div><div class="v">${money(t.bridgeAnnualSave)}</div><div class="sub">for ${by} yr${by===1?"":"s"} at ${Math.round(t.bridgeReturn*100)}% growth</div></div>
+        <div class="stat"><div class="k">Civilian salary needed</div><div class="v">${money(t.bridgeRequiredSalary)}</div><div class="sub">/yr through the bridge</div></div>
+      </div>
+      <div class="callout"><strong>The point:</strong> that ${money(t.bridgeRequiredSalary)}/yr is what it takes to keep your lifestyle <em>and</em> bank enough to live on forever — in just ${by} year${by===1?"":"s"}. The closer you are to 20, the more extreme it gets; separating earlier (a longer runway) brings it down. That gap is the real cost of walking away from the pension.</div>
+    </div>`;
+  }
+
   $("#tradeoffBody").innerHTML=`
     <div class="headline tradeoff-head">
       <h3>Retire at 20 &amp; never work again — what it's worth</h3>
@@ -651,6 +691,8 @@ function renderTradeoff(s,R){
     ${t.crdp50
       ? `<div class="callout gold"><strong>And it beats a salary:</strong> with a 50%+ VA rating you keep the full pension <em>and</em> full VA (CRDP), it rises with inflation every year, and part of your income is tax-free — things a paycheck doesn't do.</div>`
       : `<div class="callout"><strong>Remember:</strong> the pension rises with inflation (COLA) every year and continues for life — a fixed salary does neither.</div>`}
+
+    ${bridgeHTML}
   `;
 }
 
@@ -985,6 +1027,7 @@ function narrationScript(s,R,D){
   }
   parts.push(`Here's a useful way to picture a twenty-year pension: it pays you like a ${money(t.pensionSalaryEquiv)} a year civilian salary — except you collect it for the rest of your life without working for it. To replace it with a paycheck, you'd have to earn that much every single year.`);
   if(t.neverWorkGapMo<=0) parts.push(`In fact, if you retire at twenty and never work again, your pension, benefits, and savings already cover your household's lifestyle.`);
+  if(t.bridgeYears>0 && t.bridgeGapMo>0) parts.push(`Now flip it around. If you separated now instead of staying, to be just as free at the twenty-year mark — never having to work again — you'd have to build a nest egg of about ${money(t.bridgeNestEgg)} in only ${t.bridgeYears} years. That would mean earning roughly ${money(t.bridgeRequiredSalary)} a year through that stretch, on top of covering your living costs. That's how hard a pension is to replace on your own.`);
   parts.push(`Looking across the five paths, the one that best matches your current quality of life is: ${R.best.name}, keeping about ${pct(R.best.match)} of today's lifestyle.`);
   parts.push(`The bottom line: ${D.verdict}. ${D.reasons[0]}`);
   parts.push(`Take a look at the bars and the fifteen-year timeline to see how each path plays out, and use the checklist so nothing falls through the cracks before you out-process. This is a planning estimate — confirm the specifics with a financial counselor before you decide.`);
